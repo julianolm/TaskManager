@@ -67,20 +67,20 @@ GET /api/cards/search?query=Feature A
 
 ## Running the Service
 
-To run the service locally, follow these steps:
+To deploy this service on your aws account, first download and configure `aws-cli` and `cdk` and then follow these steps:
 
 1. Clone the repository.
 2. Install the necessary dependencies.
-3. Run the service locally using Python.
+3. Deploy
 
 ```bash
 git clone https://github.com/your/repo.git
 cd project-directory
 pip install -r requirements.txt
-python app.py
+cdk deploy
 ```
 
-The service will be accessible at `http://localhost:5000`.
+Then you should see the deployed services on your AWS account.
 
 ## Testing
 
