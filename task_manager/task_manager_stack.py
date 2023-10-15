@@ -13,17 +13,41 @@ class TaskManagerStack(Stack):
         random_drink_function = _lambda.Function(
             self,
             id="RandomDrinkFunctionV4",
-            code=_lambda.Code.from_asset("task_manager\lambda_handler"),
-            handler="first_function.lambda_handler",
+            code=_lambda.Code.from_asset("task_manager\code"),
+            handler="lambda_handler.lambda_handler",
             runtime=_lambda.Runtime.PYTHON_3_10
         )
 
-        _apigateway.LambdaRestApi(
+        api = _apigateway.LambdaRestApi(
             self,
             "Endpoint",
             handler=random_drink_function,
             deploy_options=_apigateway.StageOptions(
                 throttling_burst_limit=5,
-                throttling_rate_limit=1
+                throttling_rate_limit=1,
+                # method_options={
+                #     "/*/*": _apigateway.MethodDeploymentOptions(
+                #         throttling_rate_limit=10,
+                #         throttling_burst_limit=5
+                #     ),
+                # }
             ),
+            proxy=True
         )
+
+        search = api.root.add_resource("search")
+        search.add_method("GET")
+        search.add_method("POST")
+
+        map = api.root.add_resource("map")
+        map.add_method("GET")
+        map.add_method("POST")
+
+        delete = api.root.add_resource("delete")
+        delete.add_method("GET")
+        delete.add_method("POST")
+
+        # api.root.add_method("ANY")
+
+        # Ideia de testes:
+        # Fazer requisicoes as rotas da api e ver se retornam o erro ou resposta esperados
