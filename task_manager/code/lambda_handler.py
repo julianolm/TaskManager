@@ -1,26 +1,35 @@
 import json
-from .controllers import search_controller, map_controller, delete_controller
-
-controllers = {
-    "": lambda event, context: "You've accessed the root route",
-    "search": search_controller,
-    "map": map_controller,
-    "delete": delete_controller
-}
+from routes import ROUTES
+from utils.middlewares import request_builder_middleware, initialize_repository_middleware
 
 def lambda_handler(event, context):
-    request_info = {"path": event["path"], "req_method": event["httpMethod"], "req_body": event["body"]}
-    response = {}
-    
-    route = event["path"].strip("/").split("/")
+    """
+    This is the entrypoint for the lambda function.
+    The event parameter is a dictionary containing the request information.
+    The context parameter is a dictionary containing the AWS context information.
 
-    controller = controllers.get(route[0], None)
-    if controller:
-        response["body"] = controller(event, context)
-    else:
-        response["body"] = "no controller found"
-    
-    return {
-        'statusCode': 200,
-        'body': json.dumps({"request_info": request_info, "response": response}),
-    }
+    Here we are delegating the request validation responsability to the controllers
+    in order to keep request specific information transparent to the handler.
+    This way the lambda_handler doesn't need to be updated. Any new routes can be added
+    to the ROUTES dictionary.
+    """
+    request, dataset = request_builder_middleware(event)
+    initialize_repository_middleware(dataset)
+
+    try:
+        route = ROUTES[f"{request['method']} {request['path']}"]
+        response = route(request)
+        return response
+
+    except KeyError:
+        print(route)
+        print()
+        return {
+            'statusCode': 404,
+            'body': json.dumps({"message": f"Route '{request['method']} {request['path']}' not found"}),
+        }
+    except Exception as e:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({"message": str(e)}),
+        }

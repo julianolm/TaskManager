@@ -1,10 +1,12 @@
-from typing import Literal, List, Optional, Dict
+from typing import List, Dict, Literal, Optional
 from io import StringIO
 import csv
 
-StatusType = Literal["Not Started", "In Progress", "Under Review", "On Hold", "Deployed", "Testing"]
+from utils.patterns import Singleton
 
 class Task:
+    StatusType = Literal["Not Started", "In Progress", "Under Review", "On Hold", "Deployed", "Testing"]
+
     def __init__(self, id: str, status: StatusType, title: str, description: str):
         self.parent: Optional['Task'] = None
         self.children: List['Task'] = []
@@ -29,14 +31,22 @@ class Task:
             f"  Children: {[child.id for child in self.children]}"
         )
 
+"""
+Here I got to a very interesting point. I dont know how to make a division between the model and the repository.
+I mean, I think I should have a class to represent a task board, just reflecting its state and with very basic methods and attributes.
 
-# Modificar o erro que aqui eh gerado como string -------------------------------------------
-class TaskBoard:
+On the other hand, I think I should have a repository class that would be responsible for the CRUD operations and for the
+persistence of the data. This class would have a reference to the task board class and would be responsible for
+manipulating it.
+
+I'm still trying to figure out a clear frontier between those two, but still dont know how to do it.
+"""
+class TaskBoardRepository(metaclass=Singleton):
     expected_header = ["Parent", "ID", "Status", "Title", "Description"]
 
     def __init__(self, data: str):
         self.data = data
-        self.root_tasks: List[Task] = self.__build_task_forest()
+        self.root_tasks: List['Task'] = self.__build_task_forest()
 
     def __check_csv_header(self, csv_string):
         # Use StringIO to treat the CSV string as a file-like object
@@ -44,13 +54,13 @@ class TaskBoard:
             csv_reader = csv.reader(file)
             header = next(csv_reader)
         if header != self.expected_header:
-            return f"Error: CSV header does not match the expected format. Expected: {self.expected_header}, Found: {header}"
+            raise Exception(f"Error: CSV header does not match the expected format. Expected: {self.expected_header}, Found: {header}", 400)
         return None
 
     def __build_task_forest(self):
         csv_string = self.data
-        
         header_check_result = self.__check_csv_header(csv_string)
+
         if header_check_result:
             return header_check_result
 
@@ -85,6 +95,12 @@ class TaskBoard:
         
         return root_tasks
 
+    def __str__(self):
+        return "\n".join([str(task) for task in self.root_tasks])
+
+    """Below are the functions that will be part of the repository (and not of the model/class)"""
+
+    # rename to export_dataset
     def csv(self):
         # Helper function to recursively build the CSV string starting from a task
         def task_csv(task: Task):
@@ -102,5 +118,5 @@ class TaskBoard:
             csv_string += task_csv(task)
         return csv_string
 
-    def __str__(self):
-        return "\n".join([str(task) for task in self.root_tasks])
+    def search(self, text_to_search):
+        return "Busca realizada com sucesso do texto: " + text_to_search
