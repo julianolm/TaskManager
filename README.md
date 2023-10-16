@@ -39,28 +39,79 @@ This service is implemented using Python, and it's preferably deployed using AWS
 
 The service provides the following API endpoints:
 
-- **GET /api/cards**: Returns a hierarchical map of all engineering task cards.
-- **GET /api/cards/search**: Searches for cards based on a query string provided in the request.
-- **DELETE /api/cards/{card_id}**: Deletes a card based on its reference.
+- **POST /search**: Searches for cards based on a query string provided in the request and returns a shallow list of them.
+- **POST /map**: Returns a hierarchical map of all engineering task cards descendants from the requested one.
+- **POST /delete**: Deletes a card on cascade based on its id and returns the updated dataset in csv format.
 
-### API Example
+### API Example - Map
 
-**Request: GET /api/cards/search?query=Feature A**
+**Request: POST /map**
 
 ```http
-GET /api/cards/search?query=Feature A
+POST /map
+```
+**Body:**
+
+```json
+{
+    "dataset": "Parent,ID,Status,Title,Description\nroot,TSK-9831,Not Started,Implement User Authentication Flow,Set up the user login and registration flow using OAuth 2.0\nTSK-9831,TSK-4012,In Progress,Optimize Database Query Performance,Profile and optimize slow-running queries in the user dashboard section.\nTSK-9831,TSK-5720,Under Review,Develop RESTful API for Product Management,Design and implement CRUD operations for the product entity.\nTSK-9831,TSK-6892,In Progress,Integrate Third-party Payment Gateway,Incorporate Stripe (or any other payment gateway) for processing user payments.\nTSK-5720,TSK-2357,On Hold,Refactor Legacy Code in User Module,\"Improve code quality, remove deprecated functions, and ensure compatibility with the latest libraries.\"\nTSK-5720,TSK-9145,In Progress,Design Responsive Landing Page,Create a responsive landing page that is compatible with both desktop and mobile devices.\nTSK-5720,TSK-3086,Deployed,Set Up Continuous Integration Pipeline,Implement a CI/CD pipeline using Jenkins (or any other CI tool) to automate the testing and deployment process.\nTSK-5720,TSK-7023,Testing,Enhance Security with Rate Limiting,Implement rate limiting on critical API endpoints to prevent abuse.\nTSK-5720,TSK-5214,Deployed,Migrate User Data to New Schema,Develop scripts to migrate existing user data to the newly designed database schema without data loss.\nTSK-7023,TSK-8490,Deployed,Implement Error Logging and Monitoring,\"Integrate tools like Sentry or Loggly to track, monitor, and alert on application errors in real-time.\"",
+    "text_to_search": "implement"
+}
+
 ```
 
 **Response:**
 
 ```json
 {
-    "Feature A - In Progress": [
-        "Task 1 - Not Started",
-        "Task 2 - Completed",
-        "Sub-task 2.1 - In Progress",
-        "Sub-task 2.2 - Completed",
-        "Task 3 - In Progress"
+    "tasks": [
+        {
+            "id": "TSK-9831",
+            "status": "Not Started",
+            "title": "Implement User Authentication Flow",
+            "description": "Set up the user login and registration flow using OAuth 2.0",
+            "children": [
+                "TSK-4012",
+                "TSK-5720",
+                "TSK-6892"
+            ]
+        },
+        {
+            "id": "TSK-5720",
+            "status": "Under Review",
+            "title": "Develop RESTful API for Product Management",
+            "description": "Design and implement CRUD operations for the product entity.",
+            "children": [
+                "TSK-2357",
+                "TSK-9145",
+                "TSK-3086",
+                "TSK-7023",
+                "TSK-5214"
+            ]
+        },
+        {
+            "id": "TSK-3086",
+            "status": "Deployed",
+            "title": "Set Up Continuous Integration Pipeline",
+            "description": "Implement a CI/CD pipeline using Jenkins (or any other CI tool) to automate the testing and deployment process.",
+            "children": []
+        },
+        {
+            "id": "TSK-7023",
+            "status": "Testing",
+            "title": "Enhance Security with Rate Limiting",
+            "description": "Implement rate limiting on critical API endpoints to prevent abuse.",
+            "children": [
+                "TSK-8490"
+            ]
+        },
+        {
+            "id": "TSK-8490",
+            "status": "Deployed",
+            "title": "Implement Error Logging and Monitoring",
+            "description": "Integrate tools like Sentry or Loggly to track, monitor, and alert on application errors in real-time.",
+            "children": []
+        }
     ]
 }
 ```
