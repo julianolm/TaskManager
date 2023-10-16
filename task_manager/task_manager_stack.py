@@ -43,10 +43,8 @@ class TaskManagerStack(Stack):
 
         # api.root.add_method("ANY")
 
-        # allow all possible routes        
-        # algo como
+        # Would be interesting if I could allow all possible routes here
+        # in the API Gateway so I can treat them accordingly in the routes
+        # in the lambda function.
+        # I think it would be something like this:
         # api.root.add_resource('/*/*')
-
-
-        # Ideia de testes:
-        # Fazer requisicoes as rotas da api e ver se retornam o erro ou resposta esperados

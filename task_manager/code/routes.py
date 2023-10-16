@@ -3,7 +3,7 @@ from useCases.MapTask import MapTask
 from useCases.DeleteTask import DeleteTask
 
 """
-The ROUTES dictionary defines the routes and link them to their respective controllers.
+The ROUTES dictionary defines the routes and links them to their respective controllers.
 """
 ROUTES = {
     "POST search": lambda request: SearchTask().handle(request),

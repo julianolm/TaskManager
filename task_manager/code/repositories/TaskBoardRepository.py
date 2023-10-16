@@ -51,13 +51,14 @@ class Task:
 
 """
 Here I got to a very interesting point. I dont know how to make a division between the model and the repository.
-I mean, I think I should have a class to represent a task board, just reflecting its state and with very basic methods and attributes.
-
-On the other hand, I think I should have a repository class that would be responsible for the CRUD operations and for the
-persistence of the data. This class would have a reference to the task board class and would be responsible for
-manipulating it.
+I mean, I think I should have a class to represent a task board, just reflecting its state and with very basic methods and attributes, 
+and another class that would be responsible for the CRUD operations and for the persistence of the data. Threrfore a class to represent the
+board 'TaskBoard' and other to provide the repository 'TaskBoardRepository'.
 
 I'm still trying to figure out a clear frontier between those two, but still dont know how to do it.
+
+On the other hand, I just can't see how the two would fit together in this project. Since the repository has to be initialized with the data
+incoming from the request it ends up doing everything the model would do. Therefore it seems that TaskBoard is just unncecessary.
 """
 class TaskBoardRepository(metaclass=Singleton):
     expected_header = ["Parent", "ID", "Status", "Title", "Description"]

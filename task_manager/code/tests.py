@@ -89,3 +89,4 @@ def test_delete_task_bad_request():
     # Expects response to be an object containinng 'statusCode': 400 and a body containing an error message "Request body missing on field: 'task_id'"
     response = lambda_handler(event, context)
     print(response)
+
