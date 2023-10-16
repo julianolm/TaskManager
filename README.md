@@ -12,17 +12,13 @@ This project is a back-end service that provides functionality to explore a set 
 
 ## Architecture
 
-This project was implemented based on the clean architecture pattern and deployed on an AWS Lambda Function using an AWS API Gateway as trigger. 
+This project was implemented based on the clean architecture pattern and deployed on an AWS Lambda Function using an AWS API Gateway as trigger.
+
+One of the particularities of the architecture is the Singleton implementation of the TaskBoardRepository, which allows to simulate with simplicity a system with a persistent storage.
 
 ### Architecture Diagram
 
-Your architecture diagram should illustrate the key components of the system, including:
-
-- **API Interface**: The entry point for interacting with the service.
-- **Data Access Layer**: Responsible for handling the interaction with the dataset.
-- **Search Module**: Implements the search functionality.
-- **Delete Module**: Implements the card deletion functionality.
-- **Mapping Module**: Generates a hierarchical map of all cards.
+![image](https://github.com/julianolm/TaskManager/assets/65794514/c56b35b0-8708-4603-bd83-5039ba4f52ce)
 
 ## API Endpoints
 
