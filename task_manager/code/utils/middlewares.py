@@ -10,9 +10,11 @@ def request_builder_middleware(event):
     but actually retrieved from some persistent storage.
     """
     body = json.loads(event["body"])
-    dataset = body["dataset"]
+    try:
+        dataset = body["dataset"]
+    except KeyError:
+        raise Exception("Request body missing on field: 'dataset'")
     del body["dataset"]
-
     request = {
         "path": event["path"].strip("/"),
         "method": event["httpMethod"],

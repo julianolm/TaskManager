@@ -43,7 +43,7 @@ def test_search_task_bad_request():
 def test_map_task_success():
     event = {
         "path": '/map',
-        "body": f'{{"task_id": "TSK-9831", "dataset": "{input_csv}"}}',
+        "body": f'{{"task_id": "TSK-9831", "datlaset": "{input_csv}"}}',
         "httpMethod": "POST"
     }
     context = {}
@@ -90,3 +90,10 @@ def test_delete_task_bad_request():
     response = lambda_handler(event, context)
     print(response)
 
+if __name__ == "__main__":
+    # test_search_task_success()
+    # test_search_task_bad_request()
+    test_map_task_success()
+    # test_map_task_bad_request()
+    # test_delete_task_success()
+    # test_delete_task_bad_request()
