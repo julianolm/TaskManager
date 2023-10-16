@@ -40,22 +40,25 @@ This service is implemented using Python, and it's preferably deployed using AWS
 The service provides the following API endpoints:
 
 - **POST /search**: Searches for cards based on a query string provided in the request and returns a shallow list of them.
+- - Requires two fields in the body: `dataset` and `text_to_search`
 - **POST /map**: Returns a hierarchical map of all engineering task cards descendants from the requested one.
+- - Requires two fields in the body: `dataset` and `task_id`
 - **POST /delete**: Deletes a card on cascade based on its id and returns the updated dataset in csv format.
+- - Requires two fields in the body: `dataset` and `task_id`
 
-### API Example - Map
+### API Example - Search
 
-**Request: POST /map**
+**Request: POST /search**
 
 ```http
-POST /map
+POST /search
 ```
 **Body:**
 
 ```json
 {
     "dataset": "Parent,ID,Status,Title,Description\nroot,TSK-9831,Not Started,Implement User Authentication Flow,Set up the user login and registration flow using OAuth 2.0\nTSK-9831,TSK-4012,In Progress,Optimize Database Query Performance,Profile and optimize slow-running queries in the user dashboard section.\nTSK-9831,TSK-5720,Under Review,Develop RESTful API for Product Management,Design and implement CRUD operations for the product entity.\nTSK-9831,TSK-6892,In Progress,Integrate Third-party Payment Gateway,Incorporate Stripe (or any other payment gateway) for processing user payments.\nTSK-5720,TSK-2357,On Hold,Refactor Legacy Code in User Module,\"Improve code quality, remove deprecated functions, and ensure compatibility with the latest libraries.\"\nTSK-5720,TSK-9145,In Progress,Design Responsive Landing Page,Create a responsive landing page that is compatible with both desktop and mobile devices.\nTSK-5720,TSK-3086,Deployed,Set Up Continuous Integration Pipeline,Implement a CI/CD pipeline using Jenkins (or any other CI tool) to automate the testing and deployment process.\nTSK-5720,TSK-7023,Testing,Enhance Security with Rate Limiting,Implement rate limiting on critical API endpoints to prevent abuse.\nTSK-5720,TSK-5214,Deployed,Migrate User Data to New Schema,Develop scripts to migrate existing user data to the newly designed database schema without data loss.\nTSK-7023,TSK-8490,Deployed,Implement Error Logging and Monitoring,\"Integrate tools like Sentry or Loggly to track, monitor, and alert on application errors in real-time.\"",
-    "text_to_search": "implement"
+    "text_to_search": "design"
 }
 
 ```
@@ -65,17 +68,6 @@ POST /map
 ```json
 {
     "tasks": [
-        {
-            "id": "TSK-9831",
-            "status": "Not Started",
-            "title": "Implement User Authentication Flow",
-            "description": "Set up the user login and registration flow using OAuth 2.0",
-            "children": [
-                "TSK-4012",
-                "TSK-5720",
-                "TSK-6892"
-            ]
-        },
         {
             "id": "TSK-5720",
             "status": "Under Review",
@@ -90,29 +82,85 @@ POST /map
             ]
         },
         {
-            "id": "TSK-3086",
-            "status": "Deployed",
-            "title": "Set Up Continuous Integration Pipeline",
-            "description": "Implement a CI/CD pipeline using Jenkins (or any other CI tool) to automate the testing and deployment process.",
+            "id": "TSK-9145",
+            "status": "In Progress",
+            "title": "Design Responsive Landing Page",
+            "description": "Create a responsive landing page that is compatible with both desktop and mobile devices.",
             "children": []
         },
         {
-            "id": "TSK-7023",
-            "status": "Testing",
-            "title": "Enhance Security with Rate Limiting",
-            "description": "Implement rate limiting on critical API endpoints to prevent abuse.",
-            "children": [
-                "TSK-8490"
-            ]
-        },
-        {
-            "id": "TSK-8490",
+            "id": "TSK-5214",
             "status": "Deployed",
-            "title": "Implement Error Logging and Monitoring",
-            "description": "Integrate tools like Sentry or Loggly to track, monitor, and alert on application errors in real-time.",
+            "title": "Migrate User Data to New Schema",
+            "description": "Develop scripts to migrate existing user data to the newly designed database schema without data loss.",
             "children": []
         }
     ]
+}
+```
+
+
+### API Example - Map
+
+**Request: POST /map**
+
+```http
+POST /map
+```
+**Body:**
+
+```json
+{
+    "dataset": "Parent,ID,Status,Title,Description\nroot,TSK-9831,Not Started,Implement User Authentication Flow,Set up the user login and registration flow using OAuth 2.0\nTSK-9831,TSK-4012,In Progress,Optimize Database Query Performance,Profile and optimize slow-running queries in the user dashboard section.\nTSK-9831,TSK-5720,Under Review,Develop RESTful API for Product Management,Design and implement CRUD operations for the product entity.\nTSK-9831,TSK-6892,In Progress,Integrate Third-party Payment Gateway,Incorporate Stripe (or any other payment gateway) for processing user payments.\nTSK-5720,TSK-2357,On Hold,Refactor Legacy Code in User Module,\"Improve code quality, remove deprecated functions, and ensure compatibility with the latest libraries.\"\nTSK-5720,TSK-9145,In Progress,Design Responsive Landing Page,Create a responsive landing page that is compatible with both desktop and mobile devices.\nTSK-5720,TSK-3086,Deployed,Set Up Continuous Integration Pipeline,Implement a CI/CD pipeline using Jenkins (or any other CI tool) to automate the testing and deployment process.\nTSK-5720,TSK-7023,Testing,Enhance Security with Rate Limiting,Implement rate limiting on critical API endpoints to prevent abuse.\nTSK-5720,TSK-5214,Deployed,Migrate User Data to New Schema,Develop scripts to migrate existing user data to the newly designed database schema without data loss.\nTSK-7023,TSK-8490,Deployed,Implement Error Logging and Monitoring,\"Integrate tools like Sentry or Loggly to track, monitor, and alert on application errors in real-time.\"",
+    "task_id": "TSK-7023"
+}
+
+```
+
+**Response:**
+
+```json
+{
+    "task": {
+        "id": "TSK-7023",
+        "status": "Testing",
+        "title": "Enhance Security with Rate Limiting",
+        "description": "Implement rate limiting on critical API endpoints to prevent abuse.",
+        "children": [
+            {
+                "id": "TSK-8490",
+                "status": "Deployed",
+                "title": "Implement Error Logging and Monitoring",
+                "description": "Integrate tools like Sentry or Loggly to track, monitor, and alert on application errors in real-time.",
+                "children": []
+            }
+        ]
+    }
+}
+```
+
+### API Example - Delete
+
+**Request: POST /delete**
+
+```http
+POST /delete
+```
+**Body:**
+
+```json
+{
+    "dataset": "Parent,ID,Status,Title,Description\nroot,TSK-9831,Not Started,Implement User Authentication Flow,Set up the user login and registration flow using OAuth 2.0\nTSK-9831,TSK-4012,In Progress,Optimize Database Query Performance,Profile and optimize slow-running queries in the user dashboard section.\nTSK-9831,TSK-5720,Under Review,Develop RESTful API for Product Management,Design and implement CRUD operations for the product entity.\nTSK-9831,TSK-6892,In Progress,Integrate Third-party Payment Gateway,Incorporate Stripe (or any other payment gateway) for processing user payments.\nTSK-5720,TSK-2357,On Hold,Refactor Legacy Code in User Module,\"Improve code quality, remove deprecated functions, and ensure compatibility with the latest libraries.\"\nTSK-5720,TSK-9145,In Progress,Design Responsive Landing Page,Create a responsive landing page that is compatible with both desktop and mobile devices.\nTSK-5720,TSK-3086,Deployed,Set Up Continuous Integration Pipeline,Implement a CI/CD pipeline using Jenkins (or any other CI tool) to automate the testing and deployment process.\nTSK-5720,TSK-7023,Testing,Enhance Security with Rate Limiting,Implement rate limiting on critical API endpoints to prevent abuse.\nTSK-5720,TSK-5214,Deployed,Migrate User Data to New Schema,Develop scripts to migrate existing user data to the newly designed database schema without data loss.\nTSK-7023,TSK-8490,Deployed,Implement Error Logging and Monitoring,\"Integrate tools like Sentry or Loggly to track, monitor, and alert on application errors in real-time.\"",
+    "task_id": "TSK-5720"
+}
+
+```
+
+**Response:**
+
+```json
+{
+    "dataset": "Parent,ID,Status,Title,Description\nroot,TSK-9831,Not Started,Implement User Authentication Flow,Set up the user login and registration flow using OAuth 2.0\nTSK-9831,TSK-4012,In Progress,Optimize Database Query Performance,Profile and optimize slow-running queries in the user dashboard section.\nTSK-9831,TSK-6892,In Progress,Integrate Third-party Payment Gateway,Incorporate Stripe (or any other payment gateway) for processing user payments."
 }
 ```
 
@@ -135,24 +183,4 @@ Then you should see the deployed services on your AWS account.
 
 ## Testing
 
-The project includes unit tests and lint checks to ensure code quality. To run the tests, use the following command:
-
-```bash
-pytest
-```
-
-Additionally, you should set up a strong CI/CD pipeline to automate these tests and deployments for a production environment.
-
-## Swagger Interface
-
-A SWAGGER-like interface for the API is provided, making it easier to explore and interact with the service. You can access it at `http://localhost:5000/api/docs`.
-
-## Contributing
-
-We welcome contributions from the open-source community. If you have ideas for improvements or want to report issues, please submit a pull request or create an issue on our GitHub repository.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
-
-Thank you for your interest in the Engineering Task Cards Explorer service. We hope you find this project both informative and useful for your engineering task management needs.
+Tests were not developed to this project in order to save time, since up to this point I don't know any python testing framewokrs nor have any prior experience writing tests in python.
