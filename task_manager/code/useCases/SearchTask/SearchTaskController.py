@@ -7,17 +7,16 @@ class SearchTaskController():
     def handle(self, request):
         try:
             text_to_search = request['body']['text_to_search']
-        except Exception as e:
+            tasks = self.searchTaskUseCase.execute(text_to_search)
+            serialized_tasks = [task.serialize() for task in tasks]
+            return {
+                'statusCode': 200,
+                'body': json.dumps({"tasks": serialized_tasks}),
+            }
+        except KeyError as e:
             return {
                 'statusCode': 400,
                 'body': json.dumps({"message": f'Request body missing on field: {str(e)}'}),
-            }
-
-        try:
-            tasks = self.searchTaskUseCase.execute(text_to_search)
-            return {
-                'statusCode': 200,
-                'body': json.dumps({"tasks": tasks}),
             }
         except Exception as e:
             return {

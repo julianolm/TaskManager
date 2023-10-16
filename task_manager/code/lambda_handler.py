@@ -13,14 +13,13 @@ def lambda_handler(event, context):
     This way the lambda_handler doesn't need to be updated. Any new routes can be added
     to the ROUTES dictionary.
     """
-    request, dataset = request_builder_middleware(event)
-    initialize_repository_middleware(dataset)
 
     try:
+        request, dataset = request_builder_middleware(event)
+        initialize_repository_middleware(dataset)
         route = ROUTES[f"{request['method']} {request['path']}"]
         response = route(request)
         return response
-
     except KeyError:
         print(route)
         print()

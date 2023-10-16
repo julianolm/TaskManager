@@ -23,13 +23,22 @@ class Task:
 
     def __str__(self):
         return (
-            f"  Parent: {self.parent.id if self.parent else 'root'}\n"
-            f"  ID: {self.id}\n"
-            f"  Status: {self.status}\n"
-            f"  Title: {self.title}\n"
-            f"  Description: {self.description}\n"
-            f"  Children: {[child.id for child in self.children]}"
+            f"ID: {self.id}\n"
+            f"Status: {self.status}\n"
+            f"Title: {self.title}\n"
+            f"Description: {self.description}\n"
+            f"Parent: {self.parent.id if self.parent else 'root'}\n"
+            f"Children: {[child.id for child in self.children]}"
         )
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "status": self.status,
+            "title": self.title,
+            "description": self.description,
+            "children": [child.id for child in self.children]
+        }
 
 """
 Here I got to a very interesting point. I dont know how to make a division between the model and the repository.
@@ -45,7 +54,9 @@ class TaskBoardRepository(metaclass=Singleton):
     expected_header = ["Parent", "ID", "Status", "Title", "Description"]
 
     def __init__(self, data: str):
+        self.__check_csv_header(data)
         self.data = data
+        self.task_dict: Dict[str, 'Task'] = self.__build_task_dict()
         self.root_tasks: List['Task'] = self.__build_task_forest()
 
     def __check_csv_header(self, csv_string):
@@ -57,48 +68,74 @@ class TaskBoardRepository(metaclass=Singleton):
             raise Exception(f"Error: CSV header does not match the expected format. Expected: {self.expected_header}, Found: {header}", 400)
         return None
 
-    def __build_task_forest(self):
+    def __build_task_dict(self):
         csv_string = self.data
-        header_check_result = self.__check_csv_header(csv_string)
-
-        if header_check_result:
-            return header_check_result
-
         task_dict: Dict[str, 'Task'] = {}  # Use a dictionary to store tasks temporarily based on their IDs
-        
         # Use StringIO to treat the CSV string as a file-like object
         with StringIO(csv_string) as file:
             csv_reader = csv.reader(file)
             next(csv_reader)  # Skip the header row
-
             for row in csv_reader:
                 parent_id, task_id, status, title, description = row
                 task = Task(task_id, status, title, description)
                 task_dict[task_id] = task
+        return task_dict
 
+    def __build_task_forest(self):
+        csv_string = self.data
         root_tasks: List['Task'] = []
-        # Now that we have all the tasks in a dictionary, we can build the tree
         with StringIO(csv_string) as file:
             csv_reader = csv.reader(file)
             next(csv_reader)  # Skip the header row
-
             for row in csv_reader:
                 parent_id, task_id, _, _, _ = row
-                task = task_dict[task_id]
+                task = self.task_dict[task_id]
                 parent_id = parent_id
-                if parent_id in task_dict:
-                    parent_task = task_dict[parent_id]
+                if parent_id in self.task_dict:
+                    parent_task = self.task_dict[parent_id]
                     parent_task.children.append(task)
                     task.parent = parent_task
                 else:
                     root_tasks.append(task)
-        
         return root_tasks
 
     def __str__(self):
         return "\n".join([str(task) for task in self.root_tasks])
 
     """Below are the functions that will be part of the repository (and not of the model/class)"""
+
+    def get_task_by_id(self, id):
+        """Returns a task given its id"""
+        return self.task_dict[id]
+    
+    def get_tasks_by_ids(self, ids):
+        """Returns a list of tasks given its ids"""
+        tasks = []
+        for id in ids:
+            task = self.get_task_by_id(id)
+            tasks.append(task)
+        return tasks
+
+    def get_ids_by_text(self, text_to_search):
+        """Searches for tasks that match the given text in the title or description and return a list of ids"""
+    
+        def match_task(task: Task):
+            """Helper function to tell if a task matches the search text"""
+            return text_to_search.lower() in task.title.lower() or text_to_search.lower() in task.description.lower()
+
+        def find_tasks_by_text(tasks, text_to_search):
+            """Helper function to recursively find tasks that match the search text"""
+            matching_tasks = []
+            for task in tasks:
+                if match_task(task):
+                    matching_tasks.append(task.id)
+
+                # Recursively search in children tasks
+                matching_tasks += find_tasks_by_text(task.children, text_to_search)
+            return matching_tasks
+
+        matching_tasks = find_tasks_by_text(self.root_tasks, text_to_search)
+        return matching_tasks
 
     # rename to export_dataset
     def csv(self):
@@ -117,6 +154,3 @@ class TaskBoardRepository(metaclass=Singleton):
         for task in self.root_tasks:
             csv_string += task_csv(task)
         return csv_string
-
-    def search(self, text_to_search):
-        return "Busca realizada com sucesso do texto: " + text_to_search
