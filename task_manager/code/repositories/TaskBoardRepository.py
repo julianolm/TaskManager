@@ -40,6 +40,15 @@ class Task:
             "children": [child.id for child in self.children]
         }
 
+    def serialize_cascading(self):
+        return {
+            "id": self.id,
+            "status": self.status,
+            "title": self.title,
+            "description": self.description,
+            "children": [child.serialize_cascading() for child in self.children]
+        }
+
 """
 Here I got to a very interesting point. I dont know how to make a division between the model and the repository.
 I mean, I think I should have a class to represent a task board, just reflecting its state and with very basic methods and attributes.
@@ -104,28 +113,28 @@ class TaskBoardRepository(metaclass=Singleton):
 
     """Below are the functions that will be part of the repository (and not of the model/class)"""
 
-    def get_task_by_id(self, id):
+    def get_task_by_id(self, id: str) -> Task:
         """Returns a task given its id"""
         return self.task_dict[id]
     
-    def get_tasks_by_ids(self, ids):
+    def get_tasks_by_ids(self, ids: List[str]) -> list[Task]:
         """Returns a list of tasks given its ids"""
-        tasks = []
+        tasks: List[Task] = []
         for id in ids:
             task = self.get_task_by_id(id)
             tasks.append(task)
         return tasks
 
-    def get_ids_by_text(self, text_to_search):
+    def get_ids_by_text(self, text_to_search: str) -> List[str]:
         """Searches for tasks that match the given text in the title or description and return a list of ids"""
     
         def match_task(task: Task):
             """Helper function to tell if a task matches the search text"""
             return text_to_search.lower() in task.title.lower() or text_to_search.lower() in task.description.lower()
 
-        def find_tasks_by_text(tasks, text_to_search):
+        def find_tasks_by_text(tasks: List['Task'], text_to_search: str) -> List[str]:
             """Helper function to recursively find tasks that match the search text"""
-            matching_tasks = []
+            matching_tasks: List[str] = []
             for task in tasks:
                 if match_task(task):
                     matching_tasks.append(task.id)
@@ -134,13 +143,22 @@ class TaskBoardRepository(metaclass=Singleton):
                 matching_tasks += find_tasks_by_text(task.children, text_to_search)
             return matching_tasks
 
-        matching_tasks = find_tasks_by_text(self.root_tasks, text_to_search)
+        matching_tasks: List[str] = find_tasks_by_text(self.root_tasks, text_to_search)
         return matching_tasks
+    
+    def delete(self, task: Task):
+        """Deletes a task given its id"""
+        for child in task.children:
+            self.delete(child)
+        if task.parent:
+            task.parent.children.remove(task)
+        else:
+            self.root_tasks.remove(task)
+        del self.task_dict[task.id]
 
-    # rename to export_dataset
-    def csv(self):
-        # Helper function to recursively build the CSV string starting from a task
-        def task_csv(task: Task):
+    def export_dataset(self):
+        """Helper function to recursively build the CSV string starting from a task"""
+        def task_csv(task: Task) -> str:
             csv_string = ""
             title = task.title if ',' not in task.title else f'"{task.title}"'
             description = task.description if ',' not in task.description else f'"{task.description}"'
@@ -149,7 +167,7 @@ class TaskBoardRepository(metaclass=Singleton):
             for child in task.children:
                 csv_string += "\n" + task_csv(child)
             return csv_string
-        # Build the CSV string starting from each root task
+        """Build the CSV string starting from each root task"""
         csv_string = ",".join(self.expected_header) + "\n"
         for task in self.root_tasks:
             csv_string += task_csv(task)

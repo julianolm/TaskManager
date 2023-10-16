@@ -21,8 +21,6 @@ def lambda_handler(event, context):
         response = route(request)
         return response
     except KeyError:
-        print(route)
-        print()
         return {
             'statusCode': 404,
             'body': json.dumps({"message": f"Route '{request['method']} {request['path']}' not found"}),
