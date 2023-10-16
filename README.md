@@ -9,13 +9,10 @@ This project is a back-end service that provides functionality to explore a set 
 - [API Endpoints](#api-endpoints)
 - [Running the Service](#running-the-service)
 - [Testing](#testing)
-- [Swagger Interface](#swagger-interface)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Architecture
 
-The first step in this project is to design the architecture. A clear and efficient architecture is essential for the success of this service. The architecture should include modules, services, and interfaces, and it should be detailed and well-documented. You can either draw the architecture on paper or create a digital diagram to visualize how the components interact with each other.
+This project was implemented based on the clean architecture pattern and deployed on an AWS Lambda Function using an AWS API Gateway as trigger. 
 
 ### Architecture Diagram
 
@@ -26,14 +23,6 @@ Your architecture diagram should illustrate the key components of the system, in
 - **Search Module**: Implements the search functionality.
 - **Delete Module**: Implements the card deletion functionality.
 - **Mapping Module**: Generates a hierarchical map of all cards.
-
-### Coding Project
-
-This service is implemented using Python, and it's preferably deployed using AWS Lambda. It is triggered by API calls, and it allows users to search, delete, and map engineering task cards. The backend is responsible for processing requests and interacting with the dataset. Here are the primary features of the service:
-
-- **Search**: Users can search for cards based on their title or description. The search results will include the card hierarchy.
-- **Delete**: Users can delete a card using its reference.
-- **Mapping**: The service can generate a hierarchical map of all cards.
 
 ## API Endpoints
 
