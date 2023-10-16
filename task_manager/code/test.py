@@ -68,7 +68,7 @@ def test_map_task_bad_request():
 def test_delete_task_success():
     event = {
         "path": '/delete',
-        "body": f'{{"task_id": "TSK-7023", "dataset": "{input_csv}"}}',
+        "body": f'{{"task_id": "TSK-5720", "dataset": "{input_csv}"}}',
         "httpMethod": "POST"
     }
     context = {}
@@ -89,12 +89,3 @@ def test_delete_task_bad_request():
     # Expects response to be an object containinng 'statusCode': 400 and a body containing an error message "Request body missing on field: 'task_id'"
     response = lambda_handler(event, context)
     print(response)
-
-if __name__ == "__main__":
-    # test_search_task_success()
-    # test_search_task_bad_request()
-    # test_map_task_success()
-    # test_map_task_bad_request()
-    # test_delete_task_success()
-    # test_delete_task_bad_request()
-    pass

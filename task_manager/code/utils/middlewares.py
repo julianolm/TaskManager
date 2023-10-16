@@ -20,7 +20,7 @@ def request_builder_middleware(event):
     }
     return request, dataset
 
-def initialize_repository_middleware(csv):
+def initialize_repository_middleware(csv: str):
     """
     This middleware is responsible for initializing the repository.
     
@@ -31,3 +31,13 @@ def initialize_repository_middleware(csv):
     be passed by the request, but actually retrieved from some persistent storage.
     """
     TaskBoardRepository(csv)
+
+def destroy_repository_middleware():
+    """
+    This middleware is responsible for destroying the repository.
+    
+    Since the lambda keeps running in the same container, the repository
+    needs to be destroyed after each request so that the next request
+    can re-initialize it with a different csv.
+    """
+    TaskBoardRepository.destroy_instance()

@@ -1,6 +1,6 @@
 import json
 from routes import ROUTES
-from utils.middlewares import request_builder_middleware, initialize_repository_middleware
+from utils.middlewares import request_builder_middleware, initialize_repository_middleware, destroy_repository_middleware
 
 def lambda_handler(event, context):
     """
@@ -19,6 +19,7 @@ def lambda_handler(event, context):
         initialize_repository_middleware(dataset)
         route = ROUTES[f"{request['method']} {request['path']}"]
         response = route(request)
+        destroy_repository_middleware()
         return response
     except KeyError:
         return {
